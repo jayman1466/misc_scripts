@@ -23,7 +23,7 @@ def optmage(oligo):
         i = i+1
     return optoligo,dG
 
-#ignore
+#list of essential genes
 f=open('essentials.txt')
 ess=f.read().split()
 f.close

@@ -23,6 +23,7 @@ def optmage(oligo):
         i = i+1
     return optoligo,dG
 
+#ignore
 f=open('essentials.txt')
 ess=f.read().split()
 f.close
@@ -32,14 +33,17 @@ f=open('20190710.txt')
 relevant=f.read().split()
 f.close
 
+#list of overlapping genes that require special recoding conversions
 f=open('overlapslist.txt')
 overlapping=f.read().split()
 f.close
 
+#ignore
 f=open('exoverlapslist.txt')
 exoverlapping=f.read().split()
 f.close
 
+#open genome sequence
 seq=open('mg1655_seq.txt').read().replace('\n','').upper()
 
 
@@ -47,15 +51,20 @@ import csv
 #import gene coordinate file
 with open('gene_coords.txt') as csvfile:
     coords=csv.reader(csvfile, delimiter='\t')
+    
+    #for each gene
     for row in coords:
         row[1].replace("'","")
+        #determine if this gene needs to be recoded
         if row[1] in relevant:
+            #find out which direction this gene goes
             if row[2]=="Clockwise":
                 start=int(row[3])
                 stop=int(row[4])
                 essential = 0
                 ovrlp= 0
                 exovrlp=0
+                #does this gene end in TGA?
                 if seq[stop-3:stop]=='TGA':
                     if row[1] in overlapping:
                         left=stop-3
@@ -73,17 +82,24 @@ with open('gene_coords.txt') as csvfile:
                     oligo=seq[stop-76:stop-3]
                     oligo+=mutation
                     oligo+=seq[stop:stop+74]
+                    
+                    #find out which replicore this gene is in so you know if your need reverse complement oligo or not for efficient MAGE
                     if stop not in range(1597981,3932974):
                         oligo=reversecomplement(oligo)
+                        
+                    #minimize oligo structure
                     optimize = optmage(oligo)
                     oligo = optimize[0]
+                    
+                    #add phosphorothioate bond
                     oligo = oligo[0] + "*" + oligo[1] + "*" + oligo[2:]
                     dG = optimize[1]
                     
                     replicore = 1
                     if start in range(1597981,3923998):
                         replicore = 2
-
+                    
+                    #is this an essential gene?
                     if row[1] in ess:
                         essential=1
                     
